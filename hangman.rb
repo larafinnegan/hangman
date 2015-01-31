@@ -11,17 +11,13 @@ class Board
     print board.join(" ")
   end
 
-  def correct_guess?(guess)
-    word.include?(guess)
-  end
-
   def win?
     board.none? {|x| x == "_"}
   end
 
-  def update(guess)
+  def update?(guess)
     word.each_with_index {|letter, index| board[index] = letter if letter == guess}
-    guess
+    word.include?(guess)
   end
 end
 
@@ -53,7 +49,7 @@ class Game
   end
 
   def check_guess
-    if board.correct_guess?(board.update(guess))
+    if board.update?(guess)
       puts "Good guess!\n\n"
     else
       puts "Sorry, the word doesn't contain that letter.\n\n"
