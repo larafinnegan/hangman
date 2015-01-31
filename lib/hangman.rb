@@ -1,28 +1,5 @@
 require 'yaml'
-
-class Board
-  attr_accessor :board, :word
-
-  def initialize(word, board=Array.new(word.length-1, "_"))
-    @word = word
-    @board = board
-    puts word
-  end
-
-  def display
-    print board.join(" ")
-  end
-
-  def win?
-    board.none? {|x| x == "_"}
-  end
-
-  def update?(guess)
-    word.each_with_index {|letter, index| board[index] = letter if letter == guess}
-    word.include?(guess)
-  end
-end
-
+require_relative 'board.rb'
 
 class Game
   attr_accessor :board, :guesses, :letters
@@ -36,6 +13,8 @@ class Game
     @board = Board.new(word.chars.to_a)
     @guesses = 12
     @letters = []
+    puts "Welcome to Hangman!\n\n"
+    menu
   end
 
   def menu
@@ -48,24 +27,27 @@ class Game
       puts "Invalid input.  Please enter 0 for a new game, or the game number of a saved game:"
       choice = gets.chomp
     end
-    if ("1"..count.to_s).include?(choice)
-      File.open("saved_games/game_#{choice}.yaml") {|yf| YAML::load(yf) }
-    end
+    choice == "0" ? play : load_file(choice) 
   end
 
-  def load_file
-    File.open("saved_games/game_3.yaml") {|yf| YAML::load(yf) }
+  def load_file(choice)
+    saved_game = YAML::load(File.read("saved_games/game_#{choice}.yaml"))
+    saved_game.play
   end
 
   def guess
-    puts "Please guess a letter:\n\n"
+    puts "Please guess a letter or press 1 to save and exit the game:\n\n"
     guess = gets.chomp.downcase
+    if guess == "1"
+      save_game
+      exit
+    end
     until ("a".."z").to_a.include?(guess) && !letters.include?(guess) 
       puts "That's not a letter, please try again." unless ("a".."z").to_a.include?(guess)
       puts "You already tried that letter, guess again!" if letters.include?(guess) 
       guess = gets.chomp.downcase
     end
-    @letters << guess
+    letters << guess
     guess
   end
 
@@ -87,19 +69,15 @@ class Game
   end
 
   def play
-    puts "Welcome to Hangman!\n\n"
-    menu if Dir.exists?("saved_games")
     board.display
-    until @guesses == 0 || board.win?
-      puts "\n\nYou have #{guesses} guesses remaining.\n\n"
+    until guesses == 0 || board.win?
+      puts "\n\nYou have #{guesses} incorrect guesses remaining.\n\n"
       puts "You have already guessed the following letters: #{@letters.join(", ")}\n\n"
       check_guess
       board.display
-      save_game
     end
-    board.win? ? (puts "\n\nCongrats, you win!") : (puts "\n\nBetter luck next time!")
+    board.win? ? (puts "\n\nCongrats, you win!") : (puts "\n\nThe word is '#{board.word[0..-2].join}'","Better luck next time!")
   end
 end
 
 game = Game.new
-game.load_file
