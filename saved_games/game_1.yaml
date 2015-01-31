@@ -1,0 +1,24 @@
+--- !ruby/object:Game
+board: !ruby/object:Board
+  word:
+  - s
+  - u
+  - n
+  - r
+  - o
+  - o
+  - f
+  - ! '
+
+'
+  board:
+  - _
+  - _
+  - _
+  - _
+  - _
+  - _
+  - _
+guesses: 11
+letters:
+- t
